@@ -16,8 +16,8 @@ namespace osu.Game.Graphics.Containers
         public const float APPEAR_DURATION = 800;
         public const float DISAPPEAR_DURATION = 500;
 
-        private const Easing easing_show = Easing.OutSine;
-        private const Easing easing_hide = Easing.InSine;
+        private const Easing easing_show = Easing.OutCubic;
+        private const Easing easing_hide = Easing.InCubic;
 
         private readonly Wave firstWave;
         private readonly Wave secondWave;
@@ -69,27 +69,27 @@ namespace osu.Game.Graphics.Containers
                 {
                     firstWave = new Wave
                     {
+                        Origin = Anchor.TopLeft,
+                        Anchor = Anchor.TopLeft,
                         Rotation = 13,
-                        FinalPosition = -930,
                     },
                     secondWave = new Wave
                     {
                         Origin = Anchor.TopRight,
                         Anchor = Anchor.TopRight,
                         Rotation = -7,
-                        FinalPosition = -560,
                     },
                     thirdWave = new Wave
                     {
+                        Origin = Anchor.TopLeft,
+                        Anchor = Anchor.TopLeft,
                         Rotation = 4,
-                        FinalPosition = -390,
                     },
                     fourthWave = new Wave
                     {
                         Origin = Anchor.TopRight,
                         Anchor = Anchor.TopRight,
                         Rotation = -2,
-                        FinalPosition = -220,
                     },
                 },
             });
@@ -105,18 +105,22 @@ namespace osu.Game.Graphics.Containers
 
         protected override void PopIn()
         {
-            foreach (var w in wavesContainer.Children)
-                w.Show();
-
-            contentContainer.MoveToY(0, APPEAR_DURATION, Easing.OutQuint);
+            float f = 0;
+            foreach (var w in wavesContainer.Children){
+                f++;
+                w.MoveToY(-20, APPEAR_DURATION * (f/4), Easing.InOutQuart);
+            }
+            contentContainer.MoveToY(0, APPEAR_DURATION * (f/4), Easing.InOutExpo);
         }
 
         protected override void PopOut()
         {
-            foreach (var w in wavesContainer.Children)
+            foreach (var w in wavesContainer.Children){
+                w.Show();
                 w.Hide();
-
-            contentContainer.MoveToY(2, DISAPPEAR_DURATION, Easing.In);
+                w.MoveToY(1, 1, Easing.InCubic);
+            }
+            contentContainer.MoveToY(1, DISAPPEAR_DURATION, Easing.InCubic);
         }
 
         protected override void UpdateAfterChildren()
@@ -131,8 +135,7 @@ namespace osu.Game.Graphics.Containers
 
         private class Wave : VisibilityContainer
         {
-            public float FinalPosition;
-
+            
             protected override bool StartHidden => true;
 
             public Wave()
@@ -159,7 +162,7 @@ namespace osu.Game.Graphics.Containers
                 Height = Parent.Parent.DrawSize.Y * 1.5f;
             }
 
-            protected override void PopIn() => Schedule(() => this.MoveToY(FinalPosition, APPEAR_DURATION, easing_show));
+            protected override void PopIn() => Schedule(() => this.MoveToY(0, APPEAR_DURATION, easing_show));
 
             protected override void PopOut()
             {
